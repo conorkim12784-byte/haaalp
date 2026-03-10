@@ -1,25 +1,20 @@
-#╭───𓆩🛡️𓆪───╮
-#     👨‍💻 𝘿𝙚𝙫: @S_S_F3  
-#    📢 𝘾𝙝: @NSEIF
-#سنكر لا تسرق
-#تمت برمجة البوت بالكامل By Saif
-#مش مسامح اي حد يخمط الملف بدون اذني
-#Saif Hassan is Top
 import telebot
 from telebot import types
 import sqlite3
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-TOKEN = os.getenv("TOKEN")
+# ────────────────────────────────────────
+#          Daredevil Group Manager Bot
+#         Dev: @I0_I6   |   ძᥲᖇᥱძᥱ᥎Ꭵᥣ
+# ────────────────────────────────────────
 
+TOKEN = os.environ.get("5715894811:AAEdH_xnLRq1zoNMvZITgQSpJWn8pPjkb4k")
 if not TOKEN:
-    raise ValueError("❌ مفيش TOKEN في ملف .env !")
+    raise ValueError("TELEGRAM_TOKEN environment variable is not set!")
 
 bot = telebot.TeleBot(TOKEN)
 
-conn = sqlite3.connect("saif.db", check_same_thread=False)
+conn = sqlite3.connect("daredevil.db", check_same_thread=False)
 c = conn.cursor()
 
 c.execute("CREATE TABLE IF NOT EXISTS owners (chat_id INTEGER, user_id INTEGER)")
@@ -80,7 +75,7 @@ def delete_reply(chat_id, trigger):
 def register_owner(message):
     if message.chat.type in ["group", "supergroup"]:
         set_owner(message.chat.id, message.from_user.id)
-        bot.reply_to(message, "✅ تم تسجيلك كمالك الجروب.")
+        bot.reply_to(message, "✅ تم تسجيلك كمالك الجروب.\nالمطور: @I0_I6")
 
 @bot.message_handler(func=lambda m: m.text and m.reply_to_message)
 def handle_commands(message):
@@ -119,12 +114,12 @@ def handle_commands(message):
         bot.unban_chat_member(chat_id, target_id)
         bot.reply_to(message, "✅ تم فك الحظر.")
     elif txt == "تقييد" and role in ["owner", "manager", "admin"]:
-        perms = telebot.types.ChatPermissions(can_send_messages=False)
+        perms = types.ChatPermissions(can_send_messages=False)
         bot.restrict_chat_member(chat_id, target_id, permissions=perms)
         bot.reply_to(message, "🚷 تم تقييده.")
     elif txt == "فك التقييد" and role in ["owner", "manager", "admin"]:
-        perms = telebot.types.ChatPermissions(can_send_messages=True, can_send_media_messages=True,
-                                              can_send_other_messages=True, can_add_web_page_previews=True)
+        perms = types.ChatPermissions(can_send_messages=True, can_send_media_messages=True,
+                                       can_send_other_messages=True, can_add_web_page_previews=True)
         bot.restrict_chat_member(chat_id, target_id, permissions=perms)
         bot.reply_to(message, "✅ تم فك التقييد.")
     elif txt == "مسح" and role in ["owner", "manager", "admin"]:
@@ -133,8 +128,10 @@ def handle_commands(message):
     elif txt == "تثبيت" and role in ["owner", "manager", "admin"]:
         bot.pin_chat_message(chat_id, message.reply_to_message.message_id)
         bot.reply_to(message, "📌 تم تثبيت الرسالة.")
+
     elif txt == "كشف":
         target_user = message.reply_to_message.from_user
+
         if target_user.id == owner:
             bot_role = "مالك"
         elif is_manager(chat_id, target_user.id):
@@ -152,8 +149,9 @@ def handle_commands(message):
             group_role_ar = "مشرف"
         else:
             group_role_ar = "عضو"
-
+        
         username = f"@{target_user.username}" if target_user.username else "لا يوجد"
+        
         caption = (
             f"👤 معلومات العضو:\n\n"
             f"• الاسم ⬅️ {target_user.full_name}\n"
@@ -169,11 +167,12 @@ def start_add_reply(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     owner = get_owner(chat_id)
-    if user_id in [owner] or is_manager(chat_id, user_id) or is_admin(chat_id, user_id):
+
+    if user_id == owner or is_manager(chat_id, user_id) or is_admin(chat_id, user_id):
         pending_replies[user_id] = {"step": 1, "chat_id": chat_id}
-        bot.reply_to(message, "✍️ اكتب الآن الجملة التي تريدني أن أرد عليها:")
+        bot.reply_to(message, "✍️ اكتب الآن الجملة اللي عايزني أرد عليها:")
     else:
-        bot.reply_to(message, "❌ لا يمكنك اضافة ردود")
+        bot.reply_to(message, "❌ مش معاك الصلاحية تضيف ردود")
 
 @bot.message_handler(func=lambda m: m.from_user.id in pending_replies)
 def add_reply_steps(message):
@@ -181,7 +180,7 @@ def add_reply_steps(message):
     if data["step"] == 1:
         data["trigger"] = message.text
         data["step"] = 2
-        bot.reply_to(message, "✅ تمام، دلوقتي اكتب الرد اللي عاوزني أقوله:")
+        bot.reply_to(message, "✅ تمام، اكتب الرد اللي عايزني أقوله:")
     elif data["step"] == 2:
         add_reply(data["chat_id"], data["trigger"], message.text)
         bot.reply_to(message, "🎉 تم إضافة الرد بنجاح.")
@@ -203,13 +202,13 @@ def list_replies(message):
             msg += f"- {t} ➡ {r}\n"
         bot.reply_to(message, msg)
     else:
-        bot.reply_to(message, "❌ لا يوجد ردود مضافة.")
+        bot.reply_to(message, "❌ مفيش ردود مضافة حاليًا.")
 
 @bot.message_handler(func=lambda m: m.text)
 def normal_commands(message):
     txt = message.text.strip()
     if txt == "المطور":
-        bot.reply_to(message, "👨‍💻 المطور: @S_S_F3")
+        bot.reply_to(message, "👨‍💻 المطور: @I0_I6")
     elif txt == "رتبتي":
         owner = get_owner(message.chat.id)
         if message.from_user.id == owner:
@@ -221,8 +220,8 @@ def normal_commands(message):
         else:
             bot.reply_to(message, "👤 عضو عادي")
     else:
-        if "سيف" in txt:
-            bot.reply_to(message, "قول يا قلب سيف ❤️")
+        if "daredevil" in txt.lower() or "دريدفيل" in txt:
+            bot.reply_to(message, "قول يا وحش Daredevil 🔥")
         else:
             replies = get_replies(message.chat.id)
             for t, r in replies:
@@ -230,5 +229,5 @@ def normal_commands(message):
                     bot.reply_to(message, r)
                     break
 
-print("🚀 سيف اشتغل يقلبي...")
+print("🚀 Daredevil Bot شغال على Railway...")
 bot.polling(none_stop=True)
