@@ -8,7 +8,7 @@ import os
 #         Dev: @I0_I6   |   ძᥲᖇᥱძᥱ᥎Ꭵᥣ
 # ────────────────────────────────────────
 
-TOKEN = os.environ.get("5715894811:AAEdH_xnLRq1zoNMvZITgQSpJWn8pPjkb4k")
+TOKEN = os.environ.get("TELEGRAM_TOKEN")
 if not TOKEN:
     raise ValueError("TELEGRAM_TOKEN environment variable is not set!")
 
